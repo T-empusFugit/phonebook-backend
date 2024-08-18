@@ -1,17 +1,16 @@
 const mongoose = require("mongoose");
 
-if (process.argv.length < 3) {
-  console.log("give password as argument");
-  process.exit(1);
-}
-
-const password = process.argv[2];
-
-const url = `mongodb+srv://userbook:${password}@cluster-phonebook.ahxbk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster-phonebook`;
+const url = process.env.MONGODB_URI;
 
 mongoose.set("strictQuery", false);
-
-mongoose.connect(url);
+mongoose
+  .connect(url)
+  .then((result) => {
+    console.log("connected to MongoDB");
+  })
+  .catch((error) => {
+    console.log("error connecting to MongoDB:", error.message);
+  });
 
 const personSchema = new mongoose.Schema({
   name: String,
@@ -20,21 +19,19 @@ const personSchema = new mongoose.Schema({
 
 const Person = mongoose.model("Person", personSchema);
 
-if (process.argv.length === 3) {
-  Person.find({}).then((result) => {
-    result.forEach((person) => {
-      console.log(person);
-    });
-    mongoose.connection.close();
-  });
-} else {
-  const person = new Person({
-    name: process.argv[3],
-    number: process.argv[4],
-  });
+// if (process.argv.length === 3) {
+//     mongoose.connection.close();
+//   });
+// } else {
+//   const person = new Person({
+//     name: process.argv[3],
+//     number: process.argv[4],
+//   });
 
-  person.save().then((result) => {
-    console.log(`Added ${person.name} number ${person.number} to phonebook`);
-    mongoose.connection.close();
-  });
-}
+//   person.save().then((result) => {
+//     console.log(`Added ${person.name} number ${person.number} to phonebook`);
+//     mongoose.connection.close();
+//   });
+// }
+
+module.exports = mongoose.model("Person", personSchema);
